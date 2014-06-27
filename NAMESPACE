@@ -1,0 +1,5 @@
+export(mixADAserver, adapcheckdatainput, adaplmmboxcox, adaplmmintervals, adapmixmod)
+
+import(lme4, flexmix, shiny, ggplot2)
+
+importFrom(mvtnorm, dmvnorm)
