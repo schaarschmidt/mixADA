@@ -1,4 +1,5 @@
-export(mixADAserver, adapcheckdatainput, adaplmmboxcox, adaplmmintervals, adapmixmod)
+export(mixADAserver, adapcheckdatainput, adaplmmboxcox, adaplmmintervals, adapmixmod,
+       propplotreg, normalize, ranefqqhist, qqhist_y)
 
 import(lme4, flexmix, shiny, ggplot2)
 
