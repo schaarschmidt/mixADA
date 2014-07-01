@@ -1,5 +1,19 @@
-FLXMRnestedlmm <-
-function(formula = . ~ ., random, 
+setClass("FLXcomponentnestedlmm",
+         representation(random="list"),
+         contains = "FLXcomponent")
+
+setClass("FLXMRnestedlmm",
+         representation(family = "character",
+                        random = "list",
+                        group = "factor",
+                        z = "matrix",
+                        which = "ANY"),
+         contains = "FLXMR")
+
+setClass("FLXMRnestedlmmfix",
+         contains = "FLXMRnestedlmm")
+
+FLXMRnestedlmm <- function(formula = . ~ ., random, 
                      varFix = c(Random = FALSE, Residual = FALSE), ...)
 {
   family <- "gaussian"
@@ -109,3 +123,65 @@ function(formula = . ~ ., random,
   }
   object
 }
+
+setMethod("FLXmstep", signature(model = "FLXMRnestedlmm"),
+          function(model, weights, components)
+{
+  weights <- weights[!duplicated(model@group),,drop=FALSE]
+  if (!is(components[[1]], "FLXcomponentnestedlmm")) {
+    random <- list(beta = lapply(model@which, function(i) rep(0, sum(unlist(lapply(model@z[[i]], ncol))))),
+                   Sigma = lapply(model@z, function(z) diag(sum(unlist(lapply(z, ncol))))))
+    return(sapply(seq_len(ncol(weights)),
+                  function(k) model@fit(model@x, model@y, weights[,k], model@z, model@which, random)))
+ }else {
+   return(sapply(seq_len(ncol(weights)),
+                 function(k) model@fit(model@x, model@y, weights[,k], model@z, model@which, 
+                                       components[[k]]@random)))
+ }
+})
+
+setMethod("FLXmstep", signature(model = "FLXMRnestedlmmfix"),
+          function(model, weights, components)
+{
+  weights <- weights[!duplicated(model@group),,drop=FALSE]
+  if (!is(components[[1]], "FLXcomponentnestedlmm")) {
+    random <- rep(list(list(beta = lapply(model@which, function(i) rep(0, sum(unlist(lapply(model@z[[i]], ncol))))),
+                            Sigma = lapply(model@z, function(z) diag(sum(unlist(lapply(z, ncol))))))),
+                       ncol(weights))
+    return(model@fit(model@x, model@y, weights, model@z, model@which, random))
+  }else
+   return(model@fit(model@x, model@y, weights, model@z, model@which, lapply(components, function(x) x@random)))
+})
+
+
+setMethod("FLXgetModelmatrix", signature(model="FLXMRnestedlmm"),
+          function(model, data, formula, lhs=TRUE, ...)
+{
+  formula_nogrouping <- flexmix:::RemoveGrouping(formula)
+  if (identical(paste(deparse(formula_nogrouping), collapse = ""), paste(deparse(formula), collapse = ""))) stop("please specify a grouping variable")
+  model <- callNextMethod(model, data, formula, lhs)
+  model@fullformula <- update(model@fullformula,
+                              paste(".~. |", flexmix:::.FLXgetGroupingVar(formula)))
+  lmt1 <- lapply(model@random, function(random) terms(random, data=data))
+  lmf <- lapply(lmt1, function(mt1) model.frame(delete.response(mt1), data=data, na.action = NULL))
+  lz <- lapply(lmf, function(mf) model.matrix(attr(mf, "terms"), data))
+  model@group <- grouping <- flexmix:::.FLXgetGrouping(formula, data)$group
+  model@x <- matrix(lapply(unique(grouping), function(g) model@x[grouping == g, , drop = FALSE]), ncol = 1)
+  if (lhs) model@y <- matrix(lapply(unique(grouping), function(g) model@y[grouping == g, , drop = FALSE]), ncol = 1)
+  lz <- lapply(unique(grouping), function(g) lapply(lz, function(z) {
+    z <- z[grouping == g, , drop = FALSE]
+    z <- z[,colSums(z) > 0, drop = FALSE]
+    z
+  }))
+  model@which <- seq_along(lz)
+  model@z <- matrix(lz, ncol = 1)
+  model
+})
+
+setMethod("FLXgetObs", "FLXMRnestedlmm", function(model) sum(sapply(model@x, nrow)))
+
+setMethod("FLXdeterminePostunscaled", signature(model = "FLXMRnestedlmm"), function(model, components, ...) {
+  sapply(components, function(x) x@logLik(model@x, model@y, model@z, model@which, model@group))
+})
+
+

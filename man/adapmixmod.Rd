@@ -6,7 +6,7 @@
 Fit two-component mixture model
 }
 \description{
-For internal use in mixADA GUI: Fit a mixture model (with or without additional random effects within subject), order resulting clusters by estimated means of the subgroups.
+For internal use in the mixADA GUI: Fit a mixture model (with or without additional random effects within subject), order resulting clusters by estimated means of the subgroups.
 }
 \usage{
 adapmixmod(DATINT, nrep = 10, design = c("c2", "h2"), 

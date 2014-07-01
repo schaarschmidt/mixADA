@@ -18,16 +18,18 @@ NORMINFO <- paste("Data have been normalized by: log-transformation of the data 
 
 "diff"={DATINTN <- DATINT[DATINT$normalizeby,]
 DATAGG <- aggregate(response ~ runsnorm, data=DATINTN, fun)
+names(DATAGG)[which(names(DATAGG)=="response")] <- "respagg"
 DATINTAGG <- merge(x=DATINT, y=DATAGG, by.x="runsnorm", by.y="runsnorm")
-DATINTAGG$normresp <- DATINTAGG$response.x - DATINTAGG$response.y 
+DATINTAGG$normresp <- DATINTAGG$response - DATINTAGG$respagg
 NORMINFO <- paste("Data have been normalized by: substracting", normfun, sep=" ")
 }, 
 
 "ratio"={DATINTN <- DATINT[DATINT$normalizeby,]
 DATAGG <- aggregate(response ~ runsnorm, data=DATINTN, fun)
 if(any(DATAGG$response < sqrt(.Machine$double.eps))){warning(paste(normfun, "in some groups for normalization are close to 0 or negative, dividing by these values may not be appropriate."))}
+names(DATAGG)[which(names(DATAGG)=="response")] <- "respagg"
 DATINTAGG <- merge(x=DATINT, y=DATAGG, by.x="runsnorm", by.y="runsnorm")
-DATINTAGG$normresp <- DATINTAGG$response.x / DATINTAGG$response.y 
+DATINTAGG$normresp <- DATINTAGG$response / DATINTAGG$respagg 
 NORMINFO <- paste("Data have been normalized by: dividing by", normfun, sep=" ")
 })
 

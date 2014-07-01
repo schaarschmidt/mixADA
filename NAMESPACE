@@ -1,6 +1,10 @@
-export(mixADAserver, adapcheckdatainput, adaplmmboxcox, adaplmmintervals, adapmixmod,
-       propplotreg, normalize, ranefqqhist, qqhist_y)
+export(mixADAserver, adapcheckdatainput, adaplmmboxcox, adaplmmintervals, adapmixmod, adapperccutpoints, adapCCP,
+       propplotreg, normalize, ranefqqhist, qqhist_y, tabk2)
 
-import(lme4, flexmix, shiny, ggplot2)
+import(flexmix, shiny, ggplot2)
 
-importFrom(mvtnorm, dmvnorm)
+importFrom(package = "mvtnorm", dmvnorm)
+
+importFrom(package = "methods", setClass, setMethod)
+importFrom(package="lme4", lmer, fixef, VarCorr, ranef)
+importClassesFrom(package = "lme4", merMod)
