@@ -1,4 +1,5 @@
-export(mixADAserver, adapcheckdatainput, adaplmmboxcox, adaplmmintervals, adapmixmod, adapperccutpoints, adapCCP,
+export(mixADAserver, 
+       adapcheckdatainput, adaplmboxcox, adaplmmboxcox, adaplmmintervals, adapmixmod, adapmixmodsampleID, adapperccutpoints, adaCCP,
        propplotreg, normalize, ranefqqhist, qqhist_y, tabk2)
 
 import(flexmix, shiny, ggplot2)
