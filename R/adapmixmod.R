@@ -71,35 +71,36 @@ switch(varfix, "no"={
 inimixID <- initFlexmix(normresp ~ 1|sampleID, data=DATINTFIT, k=2, nrep = nrep,
                           model = FLXMRnestedlmm(random = list(~ 1, ~0+runsmodel)), concomitant = FLXPmultinom(~initcl),
                           control = list(verbose = 0, iter.max = 2000, minprior = 0))
-varmodelnote <- "Two-component mixture model with different means, different random effects, different residual variance."
+varmodelnote <- "Two-component mixture model with different means, different random effects, different residual variance. "
 },
 
 "ran"={
 inimixID <- initFlexmix(normresp ~ 1|sampleID, data=DATINTFIT, k=2, nrep = nrep,
                           model = FLXMRnestedlmm(random = list(~ 1, ~0+runsmodel), varFix = c(Random = TRUE, Residual = FALSE)), concomitant = FLXPmultinom(~initcl),
                           control = list(verbose = 0, iter.max = 2000, minprior = 0))
-varmodelnote <- "Two-component mixture model with different means, equal random effects, different residual variance."
+varmodelnote <- "Two-component mixture model with different means, equal random effects, different residual variance. "
 }, 
 
 "res"={
 inimixID <- initFlexmix(normresp ~ 1|sampleID, data=DATINTFIT, k=2, nrep = nrep,
                           model = FLXMRnestedlmm(random = list(~ 1, ~0+runsmodel), varFix = c(Random = FALSE, Residual = TRUE)), concomitant = FLXPmultinom(~initcl),
                           control = list(verbose = 0, iter.max = 2000, minprior = 0))
-varmodelnote <- "Two-component mixture model with different means, different random effects, equal residual variance."
+varmodelnote <- "Two-component mixture model with different means, different random effects, equal residual variance. "
 },
 
 "bothranres"={
 inimixID <- initFlexmix(normresp ~ 1|sampleID, data=DATINTFIT, k=2, nrep = nrep,
                           model = FLXMRnestedlmm(random = list(~ 1, ~0+runsmodel), varFix = c(Random = TRUE, Residual = TRUE)), concomitant = FLXPmultinom(~initcl),
                           control = list(verbose = 0, iter.max = 2000, minprior = 0))
-varmodelnote <- "Two-component mixture model with different means, equal random effects, equal residual variance."
+varmodelnote <- "Two-component mixture model with different means, equal random effects, equal residual variance. "
 })
 })
 
 
-  bic12<-BIC(ini1ID, inimixID)
+  bic12 <- BIC(ini1ID, inimixID)
   
-  if(bic12[1,"BIC"] < bic12[2,"BIC"]){ warning("A model with only 1 population provides a better fit to this data set."); note<-"A model with only 1 population provides a better fit to this data set."}else{note<-""}
+  if(bic12[1,"BIC"] < bic12[2,"BIC"]){ warning("A model with only 1 population provides a better fit to this data set.");
+  note<-paste("NOTE: A model with only 1 subgroup (BIC = ", signif(bic12[1,"BIC"], digits=6), ") provides a better fit to this data set than the model with 2 subgroups (BIC = ", signif(bic12[2,"BIC"], digits=6), "). ", sep="")}else{note<-""}
   
   para <- parameters(inimixID)
   wlower <- order(para[1,], decreasing=FALSE)[1]

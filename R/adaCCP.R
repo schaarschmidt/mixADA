@@ -28,7 +28,7 @@ snam <- paste(resp, "spiked",sep=".")
 unam <- paste(resp, "unspiked",sep=".")
 
 PROBS <- c(1-ccplevel, ccplevel)
-QNAMS <- paste(c("lower", "upper"), signif(ccplevel, 4), "emp.perc", sep="")
+QNAMS <- paste(c("lower", "upper"), signif(ccplevel, 4), "perc", sep="")
 
 switch(comparison,
 "percinhib"={
@@ -81,7 +81,7 @@ snam <- paste(resp, "spiked",sep=".")
 unam <- paste(resp, "unspiked",sep=".")
 
 PROBS <- c(1-ccplevel, ccplevel)
-QNAMS <- paste(c("lower", "upper"), signif(ccplevel, 4), "emp.perc", sep="")
+QNAMS <- paste(c("lower", "upper"), signif(ccplevel, 4), "perc", sep="")
 
 switch(comparison,
 "percinhib"={
@@ -110,8 +110,8 @@ infoccpmeasure <- paste("For original observations (before normalization), ", ag
 
 }
 
-limitexplanation <- paste("'emp.perc': (nonparametric) percentile of ", ynam, "for those sampleIDs that were classified as 'nonresponder' in the 2-component mixture model;",
-"'emp.perc.all': (nonparametric) percentile of ", ynam, "for all sampleIDs, irrespective of the classificiation in the 2-component mixture model.",
+limitexplanation <- paste("'perc': (nonparametric) percentile of ", ynam, "for those sampleIDs that were classified as 'nonresponder' in the 2-component mixture model;",
+"'perc.all': (nonparametric) percentile of ", ynam, "for all sampleIDs, irrespective of the classificiation in the 2-component mixture model.",
  sep="")
 
 return(list(DATCOMP=DATCOMP, ynam=ynam, limtab=limtab, comparison=comparison, infoccpmeasure=infoccpmeasure, limitexplanation=limitexplanation))

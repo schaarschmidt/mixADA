@@ -12,6 +12,9 @@ shinyServer(function(input, output){
     }
   })
   
+  
+  output$plsselect <- renderText(expr = {if(is.null(datasetInput())){return("")}else{return("Select from the data set:")}    })
+  
   # return column-names of the imported data set
   cnames <- reactive(x={
     if (is.null(datasetInput())) {cnames <- " "}else{cnames <- names(datasetInput())}
@@ -35,7 +38,6 @@ treatlevels <- reactive(x = {
     if (is.null(input$treatment)||input$treatment == " "){nnames <- " "}else{nnames <- levels(as.factor(datasetInput()[,input$treatment]))}
   }
 })  
-
 
 
 output$response <- renderUI(expr = {    
@@ -82,6 +84,7 @@ PPRC <- reactive(x = {
 })
 
 
+output$propplotheader <- renderText(expr = {if(is.null(PPRC())){return("")}else{return("Proportionality of controls and samples (before normalization)")}})
 output$cappropplot <- renderText(expr = {if(is.null(PPRC())){return("")}else{return(paste(PPRC()$CAPP))}})
 
 output$propplot <- renderPlot(expr = {
@@ -92,16 +95,6 @@ output$propplot <- renderPlot(expr = {
     print(op1)
   }}
 })
-
-
-#output$capreg <- renderText(expr = {if(is.null(PPRC())){return(NULL)}else{return(paste(PPRC()$CAPREG))}})
-#output$ppreg <- renderPrint(expr = {if(is.null(PPRC())){return(NULL)}else{return(print(PPRC()$SFLM))}})
-
-#output$capcor <- renderText(expr = {if(is.null(PPRC())){return(NULL)}else{return(paste(PPRC()$CAPCOR))}})
-#output$ppcor <- renderPrint(expr = {if(is.null(PPRC())){return(NULL)}else{return(print(PPRC()$SCT))}})
-
-
-
 
 refinedata <- reactive(x = {
   if(is.null(datasetInput())||any(c(is.null(input$response), is.null(input$treatment), is.null(input$runsnorm), is.null(input$sampleID), is.null(input$tfornormalization), is.null(input$tforfitting)))||any(c(input$response, input$treatment, input$runsnorm, input$sampleID, input$tfornormalization, input$tforfitting) == " ")){RDAT<-NULL}else{
@@ -116,6 +109,7 @@ refinedata <- reactive(x = {
 return(RDAT)
 })
 
+output$normalizationheader <- renderText(expr = {if(is.null(refinedata())){return("")}else{return("Normalized data")}})
 
 output$normalizationplot <- renderPlot(expr = {
   if (is.null(refinedata())){
@@ -128,7 +122,6 @@ output$normalizationplot <- renderPlot(expr = {
   }
 })
 
-#output$normalizationinfo <- refinedata()$NORMINFO
 output$normalizationinfo <- renderText(expr = {if(is.null(refinedata())){return("")}else{return(paste(refinedata()$NORMINFO))}})
 
 # END OF NORMALIZATION
@@ -151,7 +144,9 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
     eperc <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less")
     epercall <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="all", alternative="less")
     limtab <- data.frame(rbind(lmmpi$estlimitsd, eperc, epercall))
-    print(limtab)
+    
+    if(input$normop=="logdiff"){limtab$backtransformed <- exp(limtab$value); limtab <- limtab[,c(1,4,2,3)]}
+    
     }
     if(input$design=="y"){
 
@@ -160,14 +155,16 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
       eperc <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less")
       epercall <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="all", alternative="less")
       limtab <- data.frame(rbind(lmmpi$estlimitsd, eperc, epercall))
-      print(limtab)
+      
+      if(input$normop=="logdiff"){limtab$backtransformed <- exp(limtab$value); limtab <- limtab[,c(1,4,2,3)]}
+      
     }
-  return(list(fitk2=fitk2, lmmpi=lmmpi, limtab=limtab))
+  return(list(fitk2=fitk2, lmmpi=lmmpi, limtab=limtab, exclunote=attr(epercall, which="exclunote")))
   }else{
-  return(list(fitk2=NULL, lmmpi=NULL, limtab=NULL))}
+  return(list(fitk2=NULL, lmmpi=NULL, limtab=NULL, exclunote=NULL))}
 })
 
-    
+  output$scpheader <-  renderText(expr = {if(is.null(FITK2()$fitk2)){return("")}else{return("SCP estimation: mixture model fit")}})
   output$classpredintcap <-  renderText(expr = {if(is.null(FITK2()$fitk2)){return("")}else{return("Data used for fitting, prediction limits and posterior probability for subpopulation 'nonresponder'")}})
   output$classpredintplot <- renderPlot(expr = {
       if(is.null(FITK2()$fitk2)){return(NULL)}else{
@@ -270,11 +267,16 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
 
   output$predinttabcap <-  renderText(expr = {if(is.null(FITK2()$fitk2)){return("")}else{return("Estimated mean, prediction limit and quantiles for 'nonresponder'")}}) 
   output$predinttabsub <-  renderText(expr = {if(is.null(FITK2()$fitk2)){return("")}else{return(
+    paste(
+  FITK2()$fitk2$note,     
 " In group 'nonresponder': 
- 'pred.int': prediction limit (for 1 future observation) based on fitting a random effects model to those observations that were classified as 'nonresponder' in the 2-component mixture model;
- 'postwt.perc' percentile of a sample the original observation, weighted by posterior probability to be member of group 'nonresponder';
- 'emp.perc': percentile of those original observations that were classified as 'nonresponder' in the 2-component mixture model;
- 'emp.perc.all' in group 'all': percentile of all original observations (irrespective of classification in responders or nonresponders).")}}) 
+ 'pred.int': prediction limit (for 1 future observation) based on fitting a random effects model to those observations that were classified as 'nonresponder' in the 2-component mixture model; 
+ 'postwt.perc' percentile of a sample of the original observations, weighted by the posterior probability to be member of group 'nonresponder'; 
+ 'perc': percentile of those observations that were classified as 'nonresponder' in the 2-component mixture model; 
+ 'perc.all' in group 'all': percentile of all observations (irrespective of classification in responders or nonresponders); 
+ 'perc.outlier.excl.all' in group 'all': percentile of all observations after exclusion of potential outliers:", FITK2()$exclunote,".",
+sep=""
+))}}) 
 
   output$predinttab <- renderTable(expr = {
     if(is.null(FITK2()$fitk2)){return(NULL)}else{
@@ -339,13 +341,10 @@ return(RDAT)
 if(input$fitmodel==TRUE && input$computeccp==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmodel) && !input$runsmodel == " ") & input$design %in% c("c2","h2")) | input$design == "y") && (!is.null(input$tspiked) && !input$tspiked == " ")){
 
     if(input$design %in% c("h2", "c2")){
-    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$aggfun, runsmodel=input$runsmodel)
+    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$normfun, runsmodel=input$runsmodel)
     return(resCCP)
     }else{ if(input$design == "y"){
-
-#print(str(FITK2()$fitk2$DATINT)); print(str(refinedataspiked()))
-
-    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$aggfun, runsmodel=NULL)
+    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$normfun, runsmodel=NULL)
     return(resCCP)}else{return(NULL)}
     }
 }else{return(NULL)}
@@ -461,6 +460,7 @@ if(input$fitmodel==TRUE && input$computeccp==TRUE && !is.null(refinedata()) && (
 }
     })
 
+  output$ccpheader <-  renderText(expr = {if(is.null(CCPestimation())){return("")}else{return("CCP estimation")}})   
   output$ccptabcap <-  renderText(expr = {if(is.null(CCPestimation())){return("")}else{return(paste("Estimated median and empirical percentiles for", CCPestimation()$ynam, sep=" "))}}) 
   output$ccptabsub <-  renderText(expr = {if(is.null(CCPestimation())){return("")}else{return(paste(CCPestimation()$infoccpmeasure , CCPestimation()$limitexplanation, sep=" "))}}) 
 
@@ -469,77 +469,6 @@ if(input$fitmodel==TRUE && input$computeccp==TRUE && !is.null(refinedata()) && (
       data.frame(CCPestimation()$limtab)
     }
   })
-
-# simplified summary of sampleIDs
-  
-#  FITK2s <- reactive(x = { 
-#    if (input$fitsummary==FALSE || is.null(refinedata())){
-#      return(list(fitk2=NULL, lmmpi=NULL, limtab=NULL))
-#    } else {
-#      fitk2 <- adapmixmodsampleID(refinedata()$DATINT, nrep=10, aggsamples="mean")
-#      lmmpi <- adaplmmintervals(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less", design="y")
-#      eperc <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less")
-#      epercall <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="all", alternative="less")
-#      limtab <- data.frame(rbind(lmmpi$estlimitsd, eperc, epercall))
-#      print(limtab)
-#      return(list(fitk2=fitk2, lmmpi=lmmpi, limtab=limtab))
-#    }
-#  })
-  
-  
-#  output$sclasspredintplot <- renderPlot(expr = {
-#    if(is.null(FITK2s()$fitk2)){return(NULL)}else{
-#      THISFITK2 <- FITK2s()
-#      cpp <- ggplot(data=THISFITK2$fitk2$DATINT, aes(y=normresp, x=sampleID)) + geom_point(aes(shape=cluster, color=postproblower)) + 
-#        geom_hline(data=THISFITK2$limtab, aes(yintercept=value, linetype=estimated), show_guide=TRUE) +
-#        ylab("Normalized response") + 
-#        scale_colour_continuous(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ) ) +
-#        scale_linetype_discrete(name=paste( THISFITK2$lmmpi$group,":\nestimated", sep="" ) )
-#      print(cpp)
-#    }
-#  })
-  
-#  #output$snotepredintplot <- renderPrint(expr = {if(is.null(FITK2s())){return("")}else{return(paste(FITK2s()$fitk2$varmodelnote, FITK2s()$fitk2$note, collapse=" "))}})
-
-
-
-# output$sdiagnosticcap <- renderText(expr = {if(is.null(FITK2s()$fitk2)){return("")}else{return("Diagnostic plots for residuals of 'nonresponder', after summarizing at sampleID level")}})    
-#  output$sdiagnosticplot <- renderPlot(expr = {
-#    if(is.null(FITK2s()$fitk2)){return(NULL)}else{
-#      dp <- qqhist_y(resadapintervals=FITK2s()$lmmpi, outertitle="") 
-#      print(dp)
-#    }
-#  })
-  
-  
-#  output$spredinttabcap <- renderText(expr = {if(is.null(FITK2s()$fitk2)){return("")}else{return("Estimated mean, prediction limit and quantiles for 'nonresponder' at the sampleID level")}})
-#  output$spredinttabsub <-  renderText(expr = {if(is.null(FITK2s()$fitk2)){return("")}else{return(
-#"'pred.int': prediction limit (for 1 future sampleID-mean) based on assuming normal distribution for those sampleID means that were classified as 'nonresponder' in the 2-component mixture model;
-# 'postwt.perc' percentile of a sample of the sampleID-means, weighted by posterior probability to be member of group 'nonresponder';
-# 'emp.perc.all': percentile of the sampleID-means that were classified as 'nonresponder' in the 2-component mixture model.")}}) 
-#  output$spredinttab <- renderTable(expr = {
-#    if(is.null(FITK2s()$fitk2)){return(NULL)}else{
-#      data.frame(FITK2s()$limtab)
-#   }
-#  })
-  
-  
-#  output$sflexmixtabcap <- renderText(expr = {if(is.null(FITK2s()$fitk2)){return("")}else{return("Mixture model fit: parameter estimates and size of groups (a posteriori)")}})    
-#  output$sflexmixtab <- renderTable(expr = {
-#    if(is.null(FITK2s()$fitk2)){return(NULL)}else{
-#      stabk2((FITK2s()$fitk2))
-#    }
-#  })
-
-#BOXCOXLMs <- reactive(x = {if(is.null(FITK2s()$fitk2)){return(NULL)}else{adaplmboxcox(FITK2s()$fitk2, group="nonresponder", normop=input$normop)}})
-
-#output$sboxcoxheader <- renderText(expr = {if(is.null(BOXCOXLMs())){return(NULL)}else{"Box-Cox-Lambda and LRT for normality and lognormality for sampleID means"}})
-#output$sboxcoxtab <- renderTable(expr = {if(is.null(BOXCOXLMs())){return(NULL)}else{BOXCOXLMs()$tabest}})
-#output$sboxcoxtabcap <- renderText(expr = {if(is.null(BOXCOXLMs())){return(NULL)}else{BOXCOXLMs()$tabestcap}})
-
-#output$sboxcoxtest <- renderTable(expr = {if(is.null(BOXCOXLMs())){return(NULL)}else{BOXCOXLMs()$tabtest}})
-#output$sboxcoxtestcap <- renderText(expr = {if(is.null(BOXCOXLMs())){return(NULL)}else{BOXCOXLMs()$tabtestcap}})
-
 
   
 })

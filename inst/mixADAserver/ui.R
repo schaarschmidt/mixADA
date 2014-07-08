@@ -6,19 +6,17 @@ shinyUI(pageWithSidebar(
   
   sidebarPanel(
     h3("Data import"),
-#    h6("Data should be in a csv-file with columns separated by comma (,) and decimal points (.)"),
     fileInput(inputId="datafile", label="Upload a csv-file with columns separated by comma (,) and decimal points (.)", multiple=FALSE),
 
     h3("Normalization"),
 
-    h6("Select from the data: "),
+    h4(textOutput(outputId="plsselect")),
     uiOutput("response"),
     uiOutput("treatment"),
     uiOutput("tfornormalization"),
     uiOutput("tforfitting"),
     uiOutput("sampleID"),
 
-#    checkboxInput(inputId="logtransform", label="Log-transform observations", TRUE),
     selectInput(inputId="normop", label="Normalization of samples:", choices=c("log-transform data and substract" = "logdiff", "substract" = "diff", "divide by" = "ratio")),
     selectInput(inputId="normfun", label=NULL, choices=c("mean","median")),
 
@@ -40,11 +38,6 @@ shinyUI(pageWithSidebar(
     checkboxInput(inputId="showsampleIDNR", label="Show biological samples classified as nonresponders", value=FALSE),
  # # # #   isolate(submitButton(text = "(Re)start model fitting"))
 
-#    h3("Simplified mixture model"),
-#    h6("Summarize: one value per sample ID (mean of repeated runs)"),
-#    checkboxInput(inputId="fitsummary", label="Start model fitting", value=FALSE),
-
-
     h3("CCP estimation"),
 
     uiOutput("tspiked"),
@@ -57,19 +50,15 @@ width=3
     ),
 
   mainPanel(
-    h3("Proportionality of controls and samples (before normalization)"),
+    h3(textOutput(outputId="propplotheader")),
     plotOutput(outputId="propplot"),
     textOutput(outputId="cappropplot"),
- #   h4(textOutput(outputId="capreg")),
- #   verbatimTextOutput(outputId="ppreg"),
- #   h4(textOutput(outputId="capcor")),
- #   verbatimTextOutput(outputId="ppcor"),
 
-    h3("Normalized data"),
+    h3(textOutput(outputId="normalizationheader")),
     plotOutput(outputId="normalizationplot"),
     textOutput(outputId="normalizationinfo"),
 
-    h3("SCP: Random effects mixture model"),
+    h3(textOutput(outputId="scpheader")),
     h4(textOutput(outputId="classpredintcap")),
     plotOutput(outputId="classpredintplot"),
 
@@ -77,15 +66,9 @@ width=3
 
     plotOutput(outputId="classpredinthistpooled"),
 
-
     h4(textOutput(outputId="diagnosticcap")),
     plotOutput(outputId="diagnosticplot"),
-  #  verbatimTextOutput(outputId="notepredintplot"),
     textOutput(outputId="notepredintplot"),
-
-    h4(textOutput(outputId="predinttabcap")),
-    tableOutput(outputId="predinttab"),
-    textOutput(outputId="predinttabsub"),
 
     h4(textOutput(outputId="flexmixtabcap")),
     tableOutput(outputId="flexmixtab"),
@@ -96,31 +79,13 @@ width=3
     textOutput(outputId="boxcoxtabcap"),
 
     tableOutput(outputId="boxcoxtest"),
-    textOutput(outputId="boxcoxtestcap"),#
+    textOutput(outputId="boxcoxtestcap"),
 
+ h4(textOutput(outputId="predinttabcap")),
+ tableOutput(outputId="predinttab"),
+ textOutput(outputId="predinttabsub"),
 
-#    h3("Simplified mixture model (summarizing at sampleID-level)"),
-#    h4(textOutput(outputId="sclasspredintcap")),
-#    plotOutput(outputId="sclasspredintplot"),
-
-#    h4(textOutput(outputId="sdiagnosticcap")),
-#    plotOutput(outputId="sdiagnosticplot"),
-
-#    h4(textOutput(outputId="spredinttabcap")),
-#    tableOutput(outputId="spredinttab"),
-#    textOutput(outputId="spredinttabsub"),
-
-#    h4(textOutput(outputId="sflexmixtabcap")),
-#    tableOutput(outputId="sflexmixtab"),
-
-#    h4(textOutput(outputId="sboxcoxheader")),
-#    tableOutput(outputId="sboxcoxtab"),
-#    textOutput(outputId="sboxcoxtabcap"),
-
-#    tableOutput(outputId="sboxcoxtest"),
-#    textOutput(outputId="sboxcoxtestcap")
-
-    h3("CCP estimation"),
+    h3(textOutput(outputId="ccpheader")),
     plotOutput(outputId="classCCPplot"),
     plotOutput(outputId="classCCPhist"),
     plotOutput(outputId="classCCPhistpooled"),

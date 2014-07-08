@@ -19,12 +19,13 @@ function(DATINT, nrep=10, aggsamples=c("mean", "median") )
           inimixID <- initFlexmix(normresp ~ 1, data=datsm, k=2, nrep = nrep,
                                      concomitant = FLXPmultinom(~initcl),
                                      control = list(verbose = 0, iter.max = 2000, minprior = 0))
-          varmodelnote <- paste("After computing ",aggsamples," for each sampleID: Two-component mixture model with different means, different between sampleID variance.", sep="")
+          varmodelnote <- paste("After computing ",aggsamples," for each sampleID: Two-component mixture model with different means, different between-sampleID variance.", sep="")
 
                   
-  aic12<-AIC(ini1ID, inimixID)
+  bic12 <- BIC(ini1ID, inimixID)
   
-  if(aic12[1,"AIC"] < aic12[2,"AIC"]){ warning("A model with only 1 population provides a better fit to this data set."); note<-"A model with only 1 population provides a better fit to this data set."}else{note<-""}
+  if(bic12[1,"BIC"] < bic12[2,"BIC"]){ warning("A model with only 1 subgroup provides a better fit to this data set."); 
+                                       note <- paste("A model with only 1 subgroups provides a better fit to this data set (BIC = ", signif(bic12[1,"BIC"], digits=6) ,") than the model with 2 subgroups (BIC = ", signif(bic12[2,"BIC"], digits=6), ").", sep="")}else{note<-""}
   
   para <- parameters(inimixID)
   wlower <- order(para[1,], decreasing=FALSE)[1]
