@@ -1,5 +1,5 @@
 adaplmmintervals <-
-function(resadapmixmod, design=c("c2", "h2", "y"), level=0.95, alternative="less", group=c("nonresponder", "responder","all"))
+function(resadapmixmod, design=c("c2", "h2", "c1", "h1", "y"), level=0.95, alternative="less", group=c("nonresponder", "responder","all"))
 {
   
   group <- match.arg(group)
@@ -44,6 +44,18 @@ function(resadapmixmod, design=c("c2", "h2", "y"), level=0.95, alternative="less
   PIE <- predint_lmer(fit=FIT, type=design, level=level, alternative=alternative)
   TAB <- table(droplevels(DAT[,c("sampleID", "runsmodel")]))
   VAL <- c(PIE$mu,PIE$predint)
+  },
+  "c1"={
+    FIT <- lmer(normresp ~ 1 + (1|sampleID) + (1|runsmodel), data=DAT)
+    PIE <- predint_lmer(fit=FIT, type=design, level=level, alternative=alternative)
+    TAB <- table(droplevels(DAT[,c("sampleID", "runsmodel")]))
+    VAL <- c(PIE$mu,PIE$predint)
+  },
+  "h1"={
+    FIT <- lmer(normresp ~ 1 + (1|sampleID), data=DAT)
+    PIE <- predint_lmer(fit=FIT, type=design, level=level, alternative=alternative)
+    TAB <- table(droplevels(DAT[,c("sampleID")]))
+    VAL <- c(PIE$mu,PIE$predint)
   },
   "y"={  
   FIT <- lm(normresp ~ 1, data=DAT)

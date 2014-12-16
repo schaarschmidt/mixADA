@@ -1,12 +1,14 @@
 Package: mixADA
 Type: Package
 Title: Normalization, mixture models and screening cutpoints for anti-drug-antibody reactions
-Version: 1.1
-Date: 2014-08-07
+Version: 1.2
+Date: 2014-12-10
 Author: Frank Schaarschmidt, based on contributions by Bettina Gruen, Thomas Jaki, Ludwig Hothorn
 Maintainer: Frank Schaarschmidt <schaarschmidt@biostat.uni-hannover.de>
-Depends: ggplot2
-Imports: methods, flexmix, shiny, mvtnorm, lme4
+Depends: ggplot2, flexmix
+Imports: methods, shiny, mvtnorm, lme4
 Description: Graphical user interface to perform normalization, fitting of a mixed effects mixture model
  and computation of percentiles or prediction limits with application to estimate cut points for samples exhibiting anti drug antibody reactions.
-License: GPL-2
+ Currently, two different user interfaces are available: mixADAserver() implements the complete process for raw data, mixADAsimple() implements only mixture model fits,
+ SCP and CCP computation for data sets that have already been normalized.
+License: GPL (>=2)

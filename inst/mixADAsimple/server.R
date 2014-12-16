@@ -48,17 +48,18 @@ output$treatment <- renderUI(expr = {
   selectInput("treatment", label="Sample type: Variable distinguishing biological samples, negative controls, etc.:", choices=c(cnames()), multiple=FALSE)    
 })
 
-output$tfornormalization <- renderUI(expr = {
-  selectInput("tfornormalization", label="Sample type level for normalization (negative controls)", choices=c(" ", treatlevels()), multiple=TRUE)    
-})
+
+#output$tfornormalization <- renderUI(expr = {
+#  selectInput("tfornormalization", label="Sample type level for normalization (negative controls)", choices=c(" ", treatlevels()), multiple=TRUE)    
+#})
 
 output$tforfitting <- renderUI(expr = {
   selectInput("tforfitting", label="Sample type level(s) indicating (uninhibited, unspiked) biological samples", choices=c(" ", treatlevels()), multiple=TRUE)    
 })
 
-output$runsnorm <- renderUI(expr = {    
-  selectInput("runsnorm", label="Runs: Variable(s) defining technical units within which normalization should be done", c(" ", cnames()), multiple=TRUE)    
-})
+#output$runsnorm <- renderUI(expr = {    
+#  selectInput("runsnorm", label="Runs: Variable(s) defining technical units within which normalization should be done", c(" ", cnames()), multiple=TRUE)    
+#})
 
 output$sampleID <- renderUI(expr = {    
   selectInput("sampleID", label="SampleID: Variable(s) distinguishing individuals in the biological samples:", c(" ", cnames()), multiple=TRUE)    
@@ -68,60 +69,79 @@ output$sampleID <- renderUI(expr = {
  #
 
 
-refinedatpp <- reactive(x = {
-  if(is.null(datasetInput())||any(c(is.null(input$response), is.null(input$treatment), is.null(input$runsnorm), is.null(input$sampleID), is.null(input$tfornormalization), is.null(input$tforfitting)))||any(c(input$response, input$treatment, input$runsnorm, input$sampleID, input$tfornormalization, input$tforfitting) == " ")){RDAT<-NULL}else{
-  RDAT <- adapcheckdatainput(dat=datasetInput(), response=input$response, treatment=input$treatment, runsnorm=input$runsnorm, sampleID=input$sampleID,
-                     normalizeby=input$tfornormalization, forfitting=input$tforfitting, runsmodel=input$runsmodel)}
-return(RDAT)
-})
+#refinedatpp <- reactive(x = {
+#  if(is.null(datasetInput())||any(c(is.null(input$response), is.null(input$treatment), is.null(input$runsnorm), is.null(input$sampleID), is.null(input$tfornormalization), is.null(input$tforfitting)))||any(c(input$response, input$treatment, input$runsnorm, input$sampleID, input$tfornormalization, input$tforfitting) == " ")){RDAT<-NULL}else{
+#  RDAT <- adapcheckdatainput(dat=datasetInput(), response=input$response, treatment=input$treatment, runsnorm=input$runsnorm, sampleID=input$sampleID,
+#                     normalizeby=input$tfornormalization, forfitting=input$tforfitting, runsmodel=input$runsmodel)}
+#return(RDAT)
+#})
 
 
-PPRC <- reactive(x = {
-  if(is.null(refinedatpp())){return(NULL)} else {
-  if(length(levels(refinedatpp()$DATINT$runsnorm))<3){return(NULL)} else {
-    return(propplotreg(DATINT=refinedatpp()$DATINT, normop=input$normop, normfun=input$normfun))}}
-})
+#PPRC <- reactive(x = {
+#  if(is.null(refinedatpp())){return(NULL)} else {
+#  if(length(levels(refinedatpp()$DATINT$runsnorm))<3){return(NULL)} else {
+#    return(propplotreg(DATINT=refinedatpp()$DATINT, normop=input$normop, normfun=input$normfun))}}
+#})
 
 
-output$propplotheader <- renderText(expr = {if(is.null(PPRC())){return("")}else{return("Proportionality of controls and samples (before normalization)")}})
-output$cappropplot <- renderText(expr = {if(is.null(PPRC())){return("")}else{return(paste(PPRC()$CAPP))}})
+#output$propplotheader <- renderText(expr = {if(is.null(PPRC())){return("")}else{return("Proportionality of controls and samples (before normalization)")}})
+#output$cappropplot <- renderText(expr = {if(is.null(PPRC())){return("")}else{return(paste(PPRC()$CAPP))}})
 
-output$propplot <- renderPlot(expr = {
-  if(is.null(PPRC())){return(NULL)} else {
-  if(length(levels(refinedatpp()$DATINT$runsnorm))<3){return(NULL)} else {
-    op1 <- ggplot(data=PPRC()$DATAGGNF, aes(y=samples, x=controls)) + geom_point(aes(colour=runsnorm)) + 
-           geom_abline(intercept = PPRC()$SFLM$coefficients[1,1], slope=PPRC()$SFLM$coefficients[2,1])
-    print(op1)
-  }}
-})
+#output$propplot <- renderPlot(expr = {
+#  if(is.null(PPRC())){return(NULL)} else {
+#  if(length(levels(refinedatpp()$DATINT$runsnorm))<3){return(NULL)} else {
+#    op1 <- ggplot(data=PPRC()$DATAGGNF, aes(y=samples, x=controls)) + geom_point(aes(colour=runsnorm)) + 
+#           geom_abline(intercept = PPRC()$SFLM$coefficients[1,1], slope=PPRC()$SFLM$coefficients[2,1])
+#    print(op1)
+#  }}
+#})
 
 refinedata <- reactive(x = {
-  if(is.null(datasetInput())||any(c(is.null(input$response), is.null(input$treatment), is.null(input$runsnorm), is.null(input$sampleID), is.null(input$tfornormalization), is.null(input$tforfitting)))||any(c(input$response, input$treatment, input$runsnorm, input$sampleID, input$tfornormalization, input$tforfitting) == " ")){RDAT<-NULL}else{
-  RDAT <- adapcheckdatainput(dat=datasetInput(), response=input$response, treatment=input$treatment, runsnorm=input$runsnorm, sampleID=input$sampleID,
-                     normalizeby=input$tfornormalization, forfitting=input$tforfitting, runsmodel = input$runsmodel
-)
-  normDAT <- normalize(DATINT=RDAT$DATINT, normop=input$normop, normfun=input$normfun)
-  RDAT$DATINT <- normDAT$NORMDAT
-  OUTNORMINFO<- paste( normDAT$NORMINFO, RDAT$textnormlev, RDAT$textnormunit, sep=" ")
-  RDAT$NORMINFO <- OUTNORMINFO
-}
+  if(is.null(datasetInput())||
+       any(c(is.null(input$response), is.null(input$treatment), is.null(input$sampleID), is.null(input$tforfitting)))||
+       any(c(input$response, input$treatment, input$sampleID, input$tforfitting) == " ")){RDAT<-NULL}else{
+  RDAT <- adapcheckdatainputsimple(dat=datasetInput(), response=input$response, treatment=input$treatment, sampleID=input$sampleID,
+                     forfitting=input$tforfitting, runsmodel = input$runsmodel)
+  if(input$logtransform){
+    RDAT$DATINT$normresp <- log(RDAT$DATINT$response)
+    RDAT$NORMINFO <- "Data have been log-transformed before analysis."
+    RDAT$RESPNAME <- paste("Log-transformed response (", input$response, ")", sep=" ")
+  }else{
+    RDAT$DATINT$normresp <- RDAT$DATINT$response
+    RDAT$NORMINFO <- "Data are analyzed as imported."
+    RDAT$RESPNAME <- input$response
+  }
+       }  
+#  RDAT$DATINT <- normDAT$NORMDAT
+#  OUTNORMINFO<- paste( normDAT$NORMINFO, RDAT$textnormlev, RDAT$textnormunit, sep=" ")
+#  RDAT$NORMINFO <- OUTNORMINFO
+#print(str(RDAT, max.level=2))
 return(RDAT)
 })
 
-output$normalizationheader <- renderText(expr = {if(is.null(refinedata())){return("")}else{return("Normalized data")}})
+output$normalizationheader <- renderText(expr = {if(is.null(refinedata())){return("")}else{return("Data")}})
 
 output$normalizationplot <- renderPlot(expr = {
   if (is.null(refinedata())){
     return(NULL)
   } else {
+    if(is.null(input$runsmodel)||input$runsmodel == " "){
     op1 <- ggplot(data=refinedata()$DATINT, aes(x=sampleID, y=normresp, colour=datause)) +
-    geom_point() + facet_wrap(~runsnorm) + ylab("Normalized response") + 
+      geom_point() + ylab(refinedata()$RESPNAME) + 
     scale_colour_discrete(name="Data:" ) +
     theme(axis.text.x = element_text(angle = 90, hjust = 0.5))
+    }else{
+      op1 <- ggplot(data=refinedata()$DATINT, aes(x=sampleID, y=normresp, colour=datause)) +
+        geom_point() + facet_wrap(~runsmodel) + ylab(refinedata()$RESPNAME) + 
+        scale_colour_discrete(name="Data:" ) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 0.5))  
+    }
+    
     print(op1)
+    
   }
 })
-
+output$namessage <- renderText(expr = {if(is.null(refinedata())){return("")}else{return(paste(refinedata()$NAMESSAGE))}})
 output$normalizationinfo <- renderText(expr = {if(is.null(refinedata())){return("")}else{return(paste(refinedata()$NORMINFO))}})
 
 # END OF NORMALIZATION
@@ -139,24 +159,24 @@ output$runsmodel <- renderUI(expr = {
 if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmodel) && !input$runsmodel == " ") & input$design %in% c("c1","h1")) | input$design == "y")){
 
     if(input$design %in% c("h1", "c1")){
-    fitk2 <- adapmixmod(DATINT=refinedata()$DATINT, nrep=3, varfix=input$ranef, aggfun=input$normfun)
+    fitk2 <- adapmixmod(DATINT=refinedata()$DATINT, nrep=5, varfix=input$ranef, aggfun=input$aggfun, design=input$design)
     lmmpi <- adaplmmintervals(resadapmixmod=fitk2,  level=input$level, group="nonresponder", alternative="less", design=input$design)
     eperc <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less")
     epercall <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="all", alternative="less")
     limtab <- data.frame(rbind(lmmpi$estlimitsd, eperc, epercall))
     
-    if(input$normop=="logdiff"){limtab$backtransformed <- exp(limtab$value); limtab <- limtab[,c(1,4,2,3)]}
+    if(input$logtransform){limtab$backtransformed <- exp(limtab$value); limtab <- limtab[,c(1,4,2,3)]}
     
     }
     if(input$design=="y"){
 
-      fitk2 <- adapmixmodsampleID(refinedata()$DATINT, nrep=10, aggsamples=input$normfun)
+      fitk2 <- adapmixmodsampleID(refinedata()$DATINT, nrep=10, aggsamples=input$aggfun)
       lmmpi <- adaplmmintervals(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less", design="y")
       eperc <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less")
       epercall <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="all", alternative="less")
       limtab <- data.frame(rbind(lmmpi$estlimitsd, eperc, epercall))
       
-      if(input$normop=="logdiff"){limtab$backtransformed <- exp(limtab$value); limtab <- limtab[,c(1,4,2,3)]}
+      if(input$logtransform){limtab$backtransformed <- exp(limtab$value); limtab <- limtab[,c(1,4,2,3)]}
       
     }
   return(list(fitk2=fitk2, lmmpi=lmmpi, limtab=limtab, exclunote=attr(epercall, which="exclunote")))
@@ -172,8 +192,8 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
         THISFITK2 <- FITK2()
         cpp <- ggplot(data=THISFITK2$fitk2$DATINT, aes(y=normresp, x=sampleID)) + geom_point(aes(shape=cluster, color=postproblower)) + facet_wrap(~runsmodel) + 
           geom_hline(data=THISFITK2$limtab, aes(yintercept=value, linetype=estimated), show_guide=TRUE) +
-          ylab("Normalized response") + 
-          scale_colour_continuous(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ) ) +
+          ylab("Response") + 
+          scale_colour_continuous(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" )) +
           scale_linetype_discrete(name=paste( THISFITK2$lmmpi$group,":\nestimated", sep="" ) ) +
           theme(axis.text.x = element_text(angle = 90))
 
@@ -183,7 +203,7 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
       THISFITK2 <- FITK2()
       cpp <- ggplot(data=THISFITK2$fitk2$DATINT, aes(y=normresp, x=sampleID)) + geom_point(aes(shape=cluster, color=postproblower)) + 
         geom_hline(data=THISFITK2$limtab, aes(yintercept=value, linetype=estimated), show_guide=TRUE) +
-        ylab("Normalized response") + 
+        ylab("Response") + 
         scale_colour_continuous(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ) ) +
         scale_linetype_discrete(name=paste( THISFITK2$lmmpi$group,":\nestimated", sep="" ) ) +
         theme(axis.text.x = element_text(angle = 90))
@@ -199,14 +219,13 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
         THISFITK2 <- FITK2()
         #print(str(THISFITK2$fitk2$DATINT))
         DDP<-THISFITK2$fitk2$DATINT
-        DDP$posteriorpc <- cut(DDP$postproblower, breaks=c(0,0.01,0.05, 0.1,0.2,0.5,0.8,0.9, 0.95, 0.99,1), include.lowest=TRUE )
+        DDP$posteriorpc <- cut(DDP$postproblower, breaks=c(0,0.01,0.05, 0.1, 0.2, 0.5, 0.8, 0.9, 0.95, 0.99,1), include.lowest=TRUE )
         rx <- diff(range(DDP$normresp, na.rm=TRUE))
         nb <- max(15, nclass.FD(na.omit(DDP$normresp)))
-        cpphist <- ggplot(data=DDP, aes(x=normresp)) + geom_histogram(aes(fill=posteriorpc), binwidth=rx/nb) +
-          facet_wrap(~runsmodel) + 
+        cpphist <- ggplot(data=DDP, aes(x=normresp)) + geom_histogram(aes(fill=posteriorpc), binwidth=rx/nb) + facet_wrap(~runsmodel) + 
           geom_vline(data=THISFITK2$limtab, aes(xintercept=value, linetype=estimated), show_guide=TRUE) +
-          xlab("Normalized response") + 
-          scale_fill_discrete(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ), drop=FALSE ) +
+          xlab("Response") + 
+          scale_fill_discrete(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ), drop=FALSE  ) +
           scale_linetype_discrete(name=paste( THISFITK2$lmmpi$group,":\nestimated", sep="" ) ) #+
          # theme(axis.text.x = element_text(angle = 90, hjust = 0.5))
 
@@ -216,13 +235,13 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
       THISFITK2 <- FITK2()
       #print(str(THISFITK2$fitk2$DATINT))
         DDP<-THISFITK2$fitk2$DATINT
-        DDP$posteriorpc <- cut(DDP$postproblower, breaks=c(0,0.01,0.05, 0.1,0.2,0.5,0.8,0.9, 0.95, 0.99,1), include.lowest=TRUE )
+        DDP$posteriorpc <- cut(DDP$postproblower, breaks=c(0,0.01,0.05, 0.1, 0.2, 0.5, 0.8, 0.9, 0.95, 0.99,1), include.lowest=TRUE)
         rx <- diff(range(DDP$normresp, na.rm=TRUE))
         nb <- max(15, nclass.FD(na.omit(DDP$normresp)))
         cpphist <- ggplot(data=DDP, aes(x=normresp)) + geom_histogram(aes(fill=posteriorpc), binwidth=rx/nb)  + 
         geom_vline(data=THISFITK2$limtab, aes(xintercept=value, linetype=estimated), show_guide=TRUE) +
-        xlab("Normalized response") + 
-        scale_fill_discrete(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ), drop=FALSE ) +
+        xlab("Response") + 
+        scale_fill_discrete(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ), drop=FALSE) +
         scale_linetype_discrete(name=paste( THISFITK2$lmmpi$group,":\nestimated", sep="" ) ) #+
       #  theme(axis.text.x = element_text(angle = 90, hjust = 0.5))
       print(cpphist)
@@ -236,13 +255,13 @@ if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmode
         THISFITK2 <- FITK2()
         #print(str(THISFITK2$fitk2$DATINT))
         DDP<-THISFITK2$fitk2$DATINT
-        DDP$posteriorpc <- cut(DDP$postproblower, breaks=c(0,0.01,0.05, 0.1,0.2,0.5,0.8,0.9, 0.95, 0.99,1), include.lowest=TRUE )
+        DDP$posteriorpc <- cut(DDP$postproblower, breaks=c(0,0.01,0.05, 0.1, 0.2, 0.5, 0.8, 0.9, 0.95, 0.99,1), include.lowest=TRUE)
         rx <- diff(range(DDP$normresp, na.rm=TRUE))
         nb <- max(15, nclass.FD(na.omit(DDP$normresp)))
 
         cpphist <- ggplot(data=DDP, aes(x=normresp)) + geom_histogram(aes(fill=posteriorpc), binwidth=rx/nb) + 
           geom_vline(data=THISFITK2$limtab, aes(xintercept=value, linetype=estimated), show_guide=TRUE) +
-          xlab("Normalized response") + 
+          xlab("Response") + 
           scale_fill_discrete(name=paste( THISFITK2$lmmpi$group,":\nposterior \nprobability", sep="" ), drop=FALSE ) +
           scale_linetype_discrete(name=paste( THISFITK2$lmmpi$group,":\nestimated", sep="" ) ) #+
          # theme(axis.text.x = element_text(angle = 90, hjust = 0.5))
@@ -293,8 +312,13 @@ sep=""
   }, digits=4)
   
 BOXCOXLMM <- reactive(x = {if(is.null(FITK2()$fitk2)){return(NULL)}else{
-  if(input$design %in% c("c1","h1")){return(adaplmmboxcox(FITK2()$fitk2, group="nonresponder", design=input$design, normop=input$normop))}
-    if(input$design=="y"){return(adaplmboxcox(FITK2()$fitk2, group="nonresponder", normop=input$normop))}
+  if(input$design %in% c("c1","h1")){
+    if(input$logtransform){return(adaplmmboxcox(FITK2()$fitk2, group="nonresponder", design=input$design, normop="log"))}else{
+      return(adaplmmboxcox(FITK2()$fitk2, group="nonresponder", design=input$design, normop="none"))}}
+    
+    if(input$design=="y"){
+      if(input$logtransform){return(adaplmboxcox(FITK2()$fitk2, group="nonresponder", normop="log"))}else{
+        return(adaplmboxcox(FITK2()$fitk2, group="nonresponder", normop="none"))}}
 }})
 
 output$boxcoxheader <- renderText(expr = {if(is.null(BOXCOXLMM())){return(NULL)}else{BOXCOXLMM()$header}})
@@ -317,23 +341,21 @@ return(paste("Levels of sampleID which were classified as nonresponders in the 2
 # spiked
 
 output$tspiked <- renderUI(expr = {
-  selectInput("tspiked", label="Spiked: Sample type level(s) inhibited samples",
-              choices=c(" ", treatlevels()), multiple=TRUE)    
+  selectInput("tspiked", label="Spiked: Sample type level(s) inhibited samples", choices=c(" ", treatlevels()), multiple=TRUE)    
 })
 
 
 
 refinedataspiked <- reactive(x = {
-  if(is.null(datasetInput())||any(c(is.null(input$response), is.null(input$treatment), is.null(input$runsnorm), is.null(input$sampleID), is.null(input$tfornormalization), is.null(input$tforfitting)))||any(c(input$response, input$treatment, input$runsnorm, input$sampleID, input$tfornormalization, input$tforfitting) == " ")){RDAT<-NULL}else{
-  RDAT <- adapcheckdatainput(dat=datasetInput(), response=input$response, treatment=input$treatment, runsnorm=input$runsnorm, sampleID=input$sampleID,
-                     normalizeby=input$tfornormalization, forfitting=input$tforfitting, runsmodel = input$runsmodel, spiked = input$tspiked
+  if(is.null(datasetInput())||any(c(is.null(input$response), is.null(input$treatment), is.null(input$sampleID), is.null(input$tforfitting)))||any(c(input$response, input$treatment, input$sampleID, input$tforfitting) == " ")){RDAT<-NULL}else{
+  RDAT <- adapcheckdatainputsimple(dat=datasetInput(), response=input$response, treatment=input$treatment, sampleID=input$sampleID,
+                      forfitting=input$tforfitting, runsmodel = input$runsmodel, spiked = input$tspiked
 )
-  normDAT <- normalize(DATINT=RDAT$DATINT, normop=input$normop, normfun=input$normfun)
-  RDAT$DATINT <- normDAT$NORMDAT
-  OUTNORMINFO<- paste( normDAT$NORMINFO, RDAT$textnormlev, RDAT$textnormunit, sep=" ")
-  RDAT$NORMINFO <- OUTNORMINFO
+#  normDAT <- normalize(DATINT=RDAT$DATINT, normop=input$normop, normfun=input$aggfun)
+#  RDAT$DATINT <- normDAT$NORMDAT
+#  OUTNORMINFO<- paste( normDAT$NORMINFO, RDAT$textnormlev, RDAT$textnormunit, sep=" ")
+#  RDAT$NORMINFO <- OUTNORMINFO
 }
-#print(str(RDAT, max.level=2))
 return(RDAT)
 })
 
@@ -341,13 +363,13 @@ return(RDAT)
 ###
 
   CCPestimation <- reactive(x = { 
-if(input$fitmodel==TRUE && input$computeccp==TRUE && !is.null(refinedataspiked()) && ( ((!is.null(input$runsmodel) && !input$runsmodel == " ") & input$design %in% c("c2", "h2", "c1","h1")) | input$design == "y") && (!is.null(input$tspiked) && !input$tspiked == " ")){
+if(input$fitmodel==TRUE && input$computeccp==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmodel) && !input$runsmodel == " ") & input$design %in% c("c1","h1")) | input$design == "y") && (!is.null(input$tspiked) && !input$tspiked == " ")){
 
     if(input$design %in% c("h1", "c1")){
-    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$normfun, runsmodel=input$runsmodel)
+    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$aggfun, runsmodel=input$runsmodel)
     return(resCCP)
     }else{ if(input$design == "y"){
-    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$normfun, runsmodel=NULL)
+    resCCP <- adaCCP(fitk2=FITK2()$fitk2, rdat=refinedataspiked(), ccplevel=input$ccplevel, resp=input$response, nrdefinition=c("modelclass"), comparison=input$ccpmeasure, aggfun=input$aggfun, runsmodel=NULL)
     return(resCCP)}else{return(NULL)}
     }
 }else{return(NULL)}

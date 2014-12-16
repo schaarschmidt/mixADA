@@ -1,5 +1,6 @@
 \name{adapcheckdatainput}
 \alias{adapcheckdatainput}
+\alias{adapcheckdatainputsimple}
 
 \title{
 Check properties of input data
@@ -10,6 +11,9 @@ For internal use in the mixADA GUI.
 \usage{
 adapcheckdatainput(dat, response, treatment, runsnorm, sampleID,
  normalizeby, forfitting, runsmodel = NULL, spiked = NULL)
+
+adapcheckdatainputsimple(dat, response, treatment, sampleID, forfitting,
+ runsmodel = NULL, spiked = NULL)
 }
 
 \arguments{
@@ -33,7 +37,7 @@ adapcheckdatainput(dat, response, treatment, runsnorm, sampleID,
 }
 }
 \details{
-checks input data for completeness, appropriate properties of specified columns, combines severeal factors to one nwe factor if needed and ought to give comprehensive warbnings and errors if data format is insufficient for later use in normalization, model fitting, etc.
+Checks input data for completeness, appropriate properties of specified columns, combines severeal factors to one nwe factor if needed and ought to give comprehensive warnings and errors if data format is insufficient for later use in normalization, model fitting, etc.
 }
 
 \value{

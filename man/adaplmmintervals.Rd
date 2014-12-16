@@ -8,7 +8,7 @@ Prediction intervals.
 }
 
 \usage{
-adaplmmintervals(resadapmixmod, design = c("c2", "h2", "y"), level = 0.95, 
+adaplmmintervals(resadapmixmod, design = c("c2", "h2", "c1", "h1", "y"), level = 0.95, 
 alternative = "less", group = c("nonresponder", "responder", "all"))
 }
 
@@ -16,7 +16,10 @@ alternative = "less", group = c("nonresponder", "responder", "all"))
   \item{resadapmixmod}{ an object obtained by fitting a mixture model, by using functions \code{\link{adapmixmod}}
 
 }
-  \item{design}{ one of three character strings naming an experimental design: \code{"c2"} invokes fitting a two-factor random effects model with interaction, \code{"h2"} invokes fitting a two-factor hierarchical random effects model, \code{"y"} invokes a simple model with only one variance for the biological samples
+  \item{design}{ one of three character strings naming an experimental design: \code{"c2"} invokes fitting a two-factor random effects model with interaction,   \code{"h2"} invokes fitting a two-factor hierarchical random effects model,
+\code{"c1"} invokes fitting a two-factor random effects model without interaction,
+\code{"h1"} invokes fitting a one-factor hierarchical random effects model (biological samples and nested in these, repeated measurements),
+  \code{"y"} invokes a simple model with only one variance for the biological samples
 
 }
   \item{level}{ single numeric value, ]0,1[, the levels of prediction limit

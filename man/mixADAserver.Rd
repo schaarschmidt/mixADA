@@ -1,5 +1,6 @@
 \name{mixADAserver}
 \alias{mixADAserver}
+\alias{mixADAsimple}
 
 \title{
 Opens a graphical user interface 
@@ -9,6 +10,7 @@ Opens graphical user interface, based on the server.r and ui.r files in the subf
 }
 \usage{
 mixADAserver(lib.loc = NULL, mustWork=FALSE, \dots)
+mixADAsimple(lib.loc = NULL, mustWork=FALSE, \dots)
 }
 \arguments{
   \item{lib.loc}{optional argument to be passed to \code{system.file}}
@@ -20,6 +22,7 @@ mixADAserver(lib.loc = NULL, mustWork=FALSE, \dots)
 \examples{
 \dontrun{
 mixADAserver()
+mixADAsimple()
 }
 }
 

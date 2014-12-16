@@ -1,17 +1,17 @@
 adaCCP <-
-function(fitk2, rdat, ccplevel=0.99, resp, nrdefinition=c("modelclass"), comparison=c("percinhib","ratio"), aggfun=c("mean", "median"), runsmodel)
+function(fitk2, rdat, ccplevel=0.99, resp, nrdefinition=c("modelclass"), 
+         comparison=c("percinhib","ratio"), aggfun=c("mean", "median"), runsmodel)
 {
 
 aggfun <- match.arg(aggfun)
 comparison <- match.arg(comparison)
 switch(aggfun, "mean"={AGGFUN<-mean}, "median"={AGGFUN<-median})
 
-
 if(is.null(runsmodel)){
 
 DATunspiked <- fitk2$DATINT
 RHSunspiked <- paste(c("sampleID", "cluster"), collapse="+")
-FORMunspiked<- as.formula(paste("response", "~", RHSunspiked, sep=" "))
+FORMunspiked <- as.formula(paste("response", "~", RHSunspiked, sep=" "))
 DATunspikedm <- aggregate(FORMunspiked, data=DATunspiked, FUN=AGGFUN)
  
 DATspiked <- droplevels(rdat$DATINT[rdat$DATINT$subsetspiked,])
@@ -47,8 +47,6 @@ quantile(x=DATCOMP$ratio, probs=PROBS))
 }) 
 
 
-
-
 limtabnam <- c("median", paste(QNAMS, "nonresp", sep="."), paste(QNAMS, "all", sep="."))
 
 limtab<-data.frame("group"=rep(c("nonresponder","all"), c(3,2)), "estimated"=factor(limtabnam, levels=limtabnam), value=estimates)
@@ -59,7 +57,9 @@ infoccpmeasure <- paste("For original observations (before normalization), ",agg
 }else{
 
 DATunspiked <- fitk2$DATINT
+
 #cat("unspiked, fitk2 \n");print(str(DATunspiked))
+
 RHSunspiked <- paste(c("sampleID", "runsmodel", "cluster"), collapse="+")
 FORMunspiked<- as.formula(paste("response", "~", RHSunspiked, sep=" "))
 DATunspikedm <- aggregate(FORMunspiked, data=DATunspiked, FUN=AGGFUN)
