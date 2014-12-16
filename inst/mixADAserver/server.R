@@ -139,7 +139,7 @@ output$runsmodel <- renderUI(expr = {
 if(input$fitmodel==TRUE && !is.null(refinedata()) && ( ((!is.null(input$runsmodel) && !input$runsmodel == " ") & input$design %in% c("c1","h1")) | input$design == "y")){
 
     if(input$design %in% c("h1", "c1")){
-    fitk2 <- adapmixmod(DATINT=refinedata()$DATINT, nrep=3, varfix=input$ranef, aggfun=input$normfun)
+    fitk2 <- adapmixmod(DATINT=refinedata()$DATINT, nrep=5, varfix=input$ranef, aggfun=input$normfun)
     lmmpi <- adaplmmintervals(resadapmixmod=fitk2,  level=input$level, group="nonresponder", alternative="less", design=input$design)
     eperc <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="nonresponder", alternative="less")
     epercall <- adapperccutpoints(resadapmixmod=fitk2, level=input$level, group="all", alternative="less")
