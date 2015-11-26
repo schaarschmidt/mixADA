@@ -3,7 +3,7 @@ export(mixADAserver, mixADAsimple,
        adapcheckdatainput, adaplmboxcox, adaplmmboxcox, adaplmmintervals, adapmixmod, adapmixmodsampleID, adapperccutpoints, adaCCP,
        propplotreg, normalize, ranefqqhist, qqhist_y, tabk2)
 
-import("flexmix", "shiny", "ggplot2")
+import("stringi","flexmix", "shiny", "ggplot2")
 
 importFrom(package = "mvtnorm", dmvnorm)
 
